@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-####### Celesystemd is a script to install all what to need to run (CELESTIA) in your server >>>> created By Aki
+####### CELESH is a script to install all what to need to run (CELESTIA) in your server >>>> created By Aki
 ## ./cel-key list --node.type light --keyring-backend test --p2p.network blockspacerace
 ## curl -X GET http://localhost:26659/balance 
 
@@ -55,7 +55,7 @@ print_welcome
 echo "Please wait.."
 ########################################################################################################################################
 #Lets create some directories
-#CELESYSTEMD will backup your key folder in the following directory 
+#CELESH will backup your key folder in the following directory 
 # lets check your system (raspberry pi like and 64Bits hardware are supported)
 # RPC Endpoins https://docs.celestia.org/nodes/blockspace-race/#rpc-endpoints The default port is 26657
 #######################################################################################################  ---default list --
@@ -508,7 +508,7 @@ gogo_installer()
 {
 source "$WORKING_DIR"/celesh_go.sh #>/dev/null 2>&1
 }
-gogo_remover()
+celesh_rmfolder()
 {
     clear
     print_welcome
@@ -560,7 +560,7 @@ options=(1 "Upgrade your Machine" off    # any option can be set to default to "
          8  "BACKUP YOUR KEYS to $BACKUP_DIR" off
          9 "Start your Node / change rpc_endpoints " off
         10 "Check celestia-lightd logs" off
-        11 "REMOVE all CELESYSTEMD FOLDER and GO (key folder is not included) " off
+        11 "REMOVE/UNINSTALL GOlang " off
         12 "REMOVE golang (will remove the current version)" off)
 ###################################################################################################################################################################################
 choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
@@ -624,8 +624,8 @@ do
        10)  #Check celestia-lightd logs
             journalctl -u celestia-lightd.service -f
             ;;
-       11)  #REMOVE all CELESYSTEMD FOLDER and GO (key folder is not included)
-            gogo_remover
+       11)  ##################################
+            celesh_rmfolder
             ;; 
        12)  #REMOVE golang (will remove the current version)
             clear
@@ -640,6 +640,7 @@ do
             countdown 3
             source ~/.bashrc >/dev/null 2>&1
             source "$HOME"/.bash_profile >/dev/null 2>&1
+            echo "golang Removed!"
             ;;
 
 esac
