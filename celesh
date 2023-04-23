@@ -1,0 +1,646 @@
+#!/usr/bin/env bash
+####### Celesystemd is a script to install all what to need to run (CELESTIA) in your server >>>> created By Aki
+## ./cel-key list --node.type light --keyring-backend test --p2p.network blockspacerace
+## curl -X GET http://localhost:26659/balance 
+
+#################################<the script should be run as root user>################################################################
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+exists()
+{
+  command -v "$1" >/dev/null 2>&1
+}
+#################################<SOME IMPORTANT CELESH DEPS>##########################################################################
+if exists dialog; then
+  echo ""
+else
+  echo ""
+  sudo apt-get install dialog -y
+fi
+if exists zip; then
+  echo ""
+else
+  echo ""
+  sudo apt-get install zip unzip jq -y
+fi
+if [[ ! -f "$HOME"/.dialogrc ]]; then
+(
+echo  "screen_color = (CYAN,BLACK,ON)"     
+) | tee "$HOME"/.dialogrc >/dev/null 2>&1
+
+fi
+########################################################################################################################################
+print_welcome() {
+BLUE=4
+CYAN=6
+RESET=$(tput sgr0)
+TEXT_COLOR="tput setaf "
+echo -e "$($TEXT_COLOR $CYAN)
+\t
+\t
+\t ██████╗███████╗██╗     ███████╗███████╗██╗  ██╗
+\t██╔════╝██╔════╝██║     ██╔════╝██╔════╝██║  ██║
+\t██║     █████╗  ██║     █████╗  ███████╗███████║
+\t██║     ██╔══╝  ██║     ██╔══╝  ╚════██║██╔══██║
+\t╚██████╗███████╗███████╗███████╗███████║██║  ██║
+\t ╚═════╝╚══════╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝
+\t ${RESET}"
+echo -e      "\t$($TEXT_COLOR $BLUE)celesh${RESET} a Celestia Community Scripts!\n"
+echo "Your Celestia Version: "$get_celestia_installed_version""
+}
+clear
+print_welcome
+echo "Please wait.."
+########################################################################################################################################
+#Lets create some directories
+#CELESYSTEMD will backup your key folder in the following directory 
+# lets check your system (raspberry pi like and 64Bits hardware are supported)
+# RPC Endpoins https://docs.celestia.org/nodes/blockspace-race/#rpc-endpoints The default port is 26657
+#######################################################################################################  ---default list --
+CELESH_VERSION="0.1"
+celegitversion="v0.9.1"
+golangversion="1.20.3"
+fecha=$(date +%Y-%m-%d-%H%M%S)
+export CELESH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+mkdir -p "${CELESH}/celeshfiles"
+mkdir -p "${CELESH}/celeshfiles/binaries"
+mkdir -p "${CELESH}/celeshfiles/working_dir"
+mkdir -p "${CELESH}/celeshfiles/backups/accounts/mnemonics"
+mkdir -p "${CELESH}/celeshfiles/backups/payforblob_logs"
+BACKUP_DIR="${CELESH}/celeshfiles/backups"
+WORKING_DIR="${CELESH}/celeshfiles/working_dir"
+KEY_DIR="$HOME/.celestia-light-blockspacerace-0/keys"
+currentnetwork="blockspacerace"
+keyring_acc_name="--keyring.accname"
+get_celestia_installed_version=$(celestia version | grep -E 'Semantic|Commit' | tr '\n' ' ')
+########################################################################################################################################
+rpc_endpoints=$(tee <<EOF >/dev/null "$WORKING_DIR"/rpc_endpoints.txt
+https://rpc-blockspacerace.pops.one/ 
+https://rpc-1.celestia.nodes.guru/
+https://rpc-2.celestia.nodes.guru/
+https://celestia-testnet.rpc.kjnodes.com/
+https://celestia.rpc.waynewayner.de/
+https://rpc-blockspacerace.mzonder.com/
+https://rpc-t.celestia.nodestake.top/
+https://rpc-blockspacerace.ryabina.io/
+https://celest-archive.rpc.theamsolutions.info/
+https://blockspacerace-rpc.chainode.tech/
+https://rpc-blockspacerace.suntzu.pro/
+https://public.celestia.w3hitchhiker.com/
+https://rpc.celestia.stakewith.us/
+https://celestia-rpc.validatrium.club/
+https://celrace-rpc.easy2stake.com/
+http://rpc.celestia.blockscope.net/
+https://rpc-celestia-testnet-blockspacerace.keplr.app/
+http://celestiarpc.bloclick.com/
+https://celestia-testnet-rpc.swiss-staking.ch/
+https://rpc-blockspacerace.moonli.me/
+http://rpc-celestia.gpvalidator.com/
+https://rpc-celestia.activenodes.io/
+https://rpc-testnet.celestia.forbole.com/
+http://209.126.86.119:26657/
+EOF
+)
+# gRPC Endpoins https://docs.celestia.org/nodes/blockspace-race/#grpc-endpoints The default port is 9090 -- not implemented -- 
+grpc_endpoints=$(tee <<EOF >/dev/null "$WORKING_DIR"/grpc_endpoints.txt
+https://grpc-blockspacerace.pops.one/
+http://rpc-1.celestia.nodes.guru:10790/
+http://rpc-2.celestia.nodes.guru:10790/
+https://celestia-testnet.grpc.kjnodes.com/
+https://celestia.waynewayner.de/grpc/
+https://grpc-blockspacerace.mzonder.com:443/
+https://grpc-t.celestia.nodestake.top/
+https://grpc-blockspacerace.ryabina.io:9090/
+https://celest-archive.grpc.theamsolutions.info:9090/
+https://blockspacerace-grpc.chainode.tech/
+https://grpc-blockspacerace.suntzu.pro:9090/
+https://public.celestia.w3hitchhiker.com/
+https://grpc.celestia.stakewith.us/
+https://celrace-grpc.easy2stake.com/
+http://rpc.celestia.blockscope.net:9191/
+https://grpc-celestia-testnet-blockspacerace.keplr.app/
+http://celestiarpc.bloclick.com:9090/
+http://celestia-testnet-grpc.swiss-staking.ch:10690/
+http://rpc-celestia.gpvalidator.com:9090/
+EOF
+)
+#echo "$rpc_endpoints"
+#echo "$grpc_endpoints"
+#####################################################################################################
+#
+countdown()
+{
+    date1=$(($(date +%s) + $1)); 
+    while [[ "$date1" -ge "$(date +%s)" ]]; do 
+        echo -ne "$(date -u --date @$(("$date1" - $(date +%s))) +%H:%M:%S)\r";
+        sleep 0.2
+    done
+}
+download_go_installer()
+{
+if [[ ! -f "$WORKING_DIR"/celesh_go.sh ]]; then
+    echo "Go installer Not found! , Downloading.."
+     echo "Downloading go installer"
+    curl -sS https://raw.githubusercontent.com/AkiAfroo/go-installer/master/go.sh -o "$WORKING_DIR"/celesh_go.sh 
+fi
+}
+check_account_exist()
+{
+    check_files_exist=""$KEY_DIR"/keyring-test"
+
+    if [[ -e $check_files_exist/*.info ]] && [[ -e $check_files_exist/*.address ]]; then
+        return 1
+    fi
+        return 0
+}
+#OPTION1: Upgrade your Machine
+celesh_upgrade()
+{
+ sudo apt-get update && sudo apt-get upgrade -y
+}
+
+#OPTION 2: Install celestia Dependencies etc.
+celesh_deps()
+{
+    #print_welcome
+    countdown 5
+    sudo apt-get install curl tar wget clang pkg-config libssl-dev jq build-essential git make ncdu -y
+    echo "done!"
+    countdown 3
+}
+
+#OPTION 3: Install Golang (will ask to remove the current version and install go 1.19.1)
+celesh_golang()
+{
+    download_go_installer #> /dev/null
+    chmod +x "$WORKING_DIR"/celesh_go.sh
+    gogo_installer "--version" "$golangversion"
+    source ~/.bashrc >/dev/null 2>&1
+    source "$HOME"/.bash_profile >/dev/null 2>&1
+}
+################################<NODE INSTALL>###############################################
+#Install Celestia Node
+celesh_install_node()
+{
+    cd "$WORKING_DIR" || exit
+    systemctl stop celestia-lightd >/dev/null 2>&1
+    rm -rvf celestia-node 
+    git clone https://github.com/celestiaorg/celestia-node.git 
+    cd celestia-node/ || exit 
+    git checkout tags/$celegitversion 
+    countdown 5
+    clear
+    print_welcome
+    echo "building celestia"
+    make build
+    #clear
+    # print_welcome
+    echo "installing celestia"
+    make install
+    echo "coping celestia binary to /usr/local/bin/"
+    countdown 5
+    #clear
+    # print_welcome
+    echo "making ce-key.."
+    make cel-key
+    echo "coping cel-key binary to /usr/local/bin/"
+    cp ./cel-key /usr/local/bin/
+    countdown 5
+    echo "copying binaries to celesh folder"
+    if [[ ! -d ${CELESH}/celeshfiles/binaries/$celegitversion ]]; then
+    mkdir -p "${CELESH}"/celeshfiles/binaries/"$celegitversion"
+    cp ./cel-key "${CELESH}"/celeshfiles/binaries/"$celegitversion"
+    cp "$WORKING_DIR"/celestia-node/build/celestia "${CELESH}"/celeshfiles/binaries/"$celegitversion"
+    else
+    cp ./cel-key "${CELESH}"/celeshfiles/binaries/"$celegitversion"
+    cp "$WORKING_DIR"/celestia-node/build/celestia "${CELESH}"/celeshfiles/binaries/"$celegitversion"
+    fi
+    echo "verifying celestia version.."
+    celestia_version=$(celestia version)
+    echo "Your celestia version is: "
+    echo "node installed"
+    echo "$celestia_version"
+    countdown 5
+}
+#####################################################################################################
+celesh_create_key()
+{
+    #print_welcome
+    #print_help
+    echo "Lets create your keys.."
+    echo ""
+    echo "if you press <Y> Celestia will create a key with the given Name if you choose <N> the script will continue with the default one"
+     read -r -p "OPTIONAL: Do you want to Create a Custom Key Name for your celestia address? (y/n) " YEP1
+    if [ "$YEP1" = "y" ]; then
+        echo ""
+        read -r -p "Please enter the Name of your Celestia custom Key. " customaccname
+        echo ""
+        #printf "%s" "$customaccname" > "$BACKUP_DIR"/accounts/current_account_name.txt
+        printf "%s" "your custom Key name: " $customaccname
+        printf "%s\t%s\n" "$customaccname" > "$BACKUP_DIR"/accounts/current_account_name.txt
+        get_endpoints
+        echo "Downloading ENDPOINTS..."
+        countdown 5
+        echo "configuring celestia-lightd.service.."
+        countdown 5
+        celestiad
+        clear
+    else
+        unset "$customaccname"
+        customaccname=my_celes_key
+        printf "%s" "the Default  Key name is: " $customaccname | tee "$BACKUP_DIR"/accounts/"$customaccname"_current_account_name.txt
+        get_endpoints
+        celestiad
+        clear
+        echo "lets create a custom key with cel-key"
+        countdown 5
+    fi
+    #cd "$KEY_DIR"/keyring-test
+    #celestia_acc_name=$(basename *.info .info)
+    #echo $celestia_acc_name >/dev/null 2>&1
+    cel-key add "$customaccname" --keyring-backend test --node.type light --p2p.network $currentnetwork 2>&1 | tee ""$BACKUP_DIR"/accounts/mnemonics/"$customaccname"-mnemonic-output-"$fecha".txt"
+    echo ""
+    echo ""
+    cd "$HOME" || exit
+    ## checking if keys were created.. *.info *.address 
+    if  check_account_exist; then 
+        echo "key created, dont forget to backup your key!"
+        echo "IMPORTANT: A copy of the output of cel-key that store yours mnemonic-seeds words is saved in ""$BACKUP_DIR"""
+        echo ""
+        echo "NOTE: we recommend making a copy of your mnemonics now in case something goes wrong!"
+       # celesh_init --> disable for only-test. dont forget remove the --> #
+    else
+        echo "something goes wrong! , cant create your Keys.."
+        #return 0
+    fi
+}
+celesh_nodeid()
+{
+
+    auth_token=$(celestia light auth admin --p2p.network blockspacerace)
+    curl -s -X POST -H "Authorization: Bearer $auth_token" -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":0,"method":"p2p.Info","params":[]}' http://localhost:26658 | jq -r .result.ID
+}
+
+celesh_backup_keys()
+{
+    clear
+    print_welcome
+    INFO=$(find "$KEY_DIR"/keyring-test/ -name *.info|head -n1)
+    ADDRESS=$(find "$KEY_DIR"/keyring-test/ -name *.address|head -n1)
+    if [ ! -z "$INFO" ] && [ ! -z "$ADDRESS" ]; then
+        echo "we found a keyring-test folder, Lets check if there something inside.."
+        zip -r -j "$BACKUP_DIR"/backup-key-folder-"$fecha".tar.gz "$KEY_DIR" 2>/dev/null
+        echo "your keys folder is saved to >>> ""$BACKUP_DIR"""
+        echo ""
+        echo ""
+    else
+        echo ""
+        echo "no Keys were found in ""$KEY_DIR""/keyring-test/ "
+        echo "skipping this step"
+        echo ""
+        echo " you can run celesh again and create your keys"
+        countdown 5
+        echo ""
+    fi
+# source: https://unix.stackexchange.com/questions/87456/shell-script-to-check-for-the-presence-of-one-or-more-files-with-a-specific-exte
+}
+celesh_showme_nodeid()
+{
+            clear
+            print_welcome
+            SHOW_NODE_ID=$(celesh_nodeid)
+            if [ -z "$SHOW_NODE_ID" ]; then
+                echo "seems your node is not up or is not installed"
+                countdown 5
+            else
+                cd "$KEY_DIR"/keyring-test
+                celestia_acc_name=$(basename *.info .info)
+                echo $celestia_acc_name >/dev/null 2>&1
+                echo "Your Node-ID is:"
+                echo "$SHOW_NODE_ID" | tee "${CELESH}"/celeshfiles/backups/accounts/"$celestia_acc_name"_nodeid_backup_"$fecha".txt
+                echo ""
+                echo "you can check your node uptime status in the following Link:"
+                echo ""
+                echo "https://tiascan.com/light-node/$SHOW_NODE_ID"
+                echo ""
+            fi
+}
+celesh_pfb_transaction()
+{
+    cpt_namespace_id=$(openssl rand -hex 8)
+    cpt_namespace_data=$(openssl rand -hex 27)
+    celesh_sender=$(curl -s -X POST -d '{"namespace_id": "'"$cpt_namespace_id"'", "data": "'"$cpt_namespace_data"'", "gas_limit": 80000, "fee": 2000}' http://localhost:26659/submit_pfb)
+    #saving the output to a file
+    mkdir -p "$BACKUP_DIR"/payforblob_logs
+    mkdir -p "$BACKUP_DIR"/payforblob_logs/"$cpt_namespace_id"
+    pfb_combined="${cpt_namespace_id}_${cpt_namespace_data}"
+    echo "$celesh_sender" | jq . | tee "$BACKUP_DIR"/payforblob_logs/"$cpt_namespace_id"/"$pfb_combined"-PayForBlob.json
+    read -r cpt_height cpt_txhash < <(echo $(cat "$BACKUP_DIR"/payforblob_logs/"$cpt_namespace_id"/"$pfb_combined"-PayForBlob.json | jq -cr '.height','.txhash'))
+    #Get namespaced shares by block height
+    get_message_shares=$(curl -s -X GET http://localhost:26659/namespaced_shares/"$cpt_namespace_id"/height/"$cpt_height")
+    echo "$get_message_shares" | jq . | tee "$BACKUP_DIR"/payforblob_logs/"$cpt_namespace_id"/"$pfb_combined"-message_shares.json 
+    countdown 3
+    clear 
+    print_welcome
+    (
+    echo ""
+    echo "  Celesh PayForBlob Sender"
+    echo "Your Namespace-ID:          $cpt_namespace_id"
+    echo ""  
+    echo "Block Height:               $cpt_height"
+    echo ""
+    echo "Txhash:                     $cpt_txhash"
+    echo "Timestamp:                  $fecha" 
+    echo "Check the transaction here:"
+    echo "https://testnet.mintscan.io/celestia-incentivized-testnet/txs/$cpt_txhash"
+    echo ""
+    ) | tee -a "$BACKUP_DIR"/payforblob_logs/"$cpt_namespace_id"/"$pfb_combined"-transaction_"$fecha".log
+    echo "output files of this transactions are saved in:"
+    echo """$BACKUP_DIR""/payforblob_logs/""$cpt_namespace_id""/"
+    echo ""
+    cpt_list=$(ls "$BACKUP_DIR"/payforblob_logs/"$cpt_namespace_id"/)
+    echo "$cpt_list"
+}
+#
+#####################################################################################################
+get_endpoints()
+{
+    echo "$rpc_endpoints"
+    echo "$grpc_endpoints"
+    cat -n "$WORKING_DIR"/rpc_endpoints.txt | awk '{ print } END { print NR }'
+    read -r -p "please choose the number of the gRPC Endpoint you would like to use: " read_rpc_endpoint
+    select_endpoint=$(cat -n "$WORKING_DIR"/rpc_endpoints.txt | sed "${read_rpc_endpoint}q;d")  
+    echo "$select_endpoint" | tee -a "$WORKING_DIR"/selected_endpoint.txt
+    IP_RPC=$(awk '{ $1=""; print substr($0,2) }' "$WORKING_DIR"/selected_endpoint.txt)
+}
+#
+#####################################################################################################
+celestiad() {
+sudo tee <<EOF >/dev/null /etc/systemd/system/celestia-lightd.service
+[Unit]
+Description=celestia-lightd Light Node
+After=network-online.target
+
+[Service]
+User=$USER
+ExecStartPre=/usr/local/bin/celestia light init ${keyring_acc_name} ${customaccname} --p2p.network $currentnetwork
+ExecStart=/usr/local/bin/celestia light start --core.ip ${IP_RPC} --core.rpc.port 26657 --core.grpc.port 9090 ${keyring_acc_name} ${customaccname} --metrics.tls=false --metrics --metrics.endpoint otel.celestia.tools:4318 --gateway --gateway.addr localhost --gateway.port 26659 --p2p.network $currentnetwork
+Restart=on-failure
+RestartSec=3
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
+check_systemd_service()
+{
+    clear
+    print_welcome
+    echo ""
+    echo "Lets check if your Node is running.."
+    if [ "$(systemctl is-active celestia-lightd.service)" = "active" ]; then
+        echo ""
+        echo "your Node seems to Be up and running.."
+    fi
+}
+celesh_new_rpc_endpoints()
+{
+    clear
+    print_welcome
+    if [ -f /etc/systemd/system/celestia-lightd.service ]; then
+         read -r getting_key_name_from_service < <(echo $(cat /etc/systemd/system/celestia-lightd.service | sed -n -e 's/^.*--keyring.accname //p' | sed 's/\s.*$//' | sort -t: -u -k1,1))
+         (
+         echo "$getting_key_name_from_service"  >/dev/null 2>&1
+         ) | tee "$BACKUP_DIR"/accounts/current_account_name.txt
+         
+    fi
+    if [ ! -z "$getting_key_name_from_service" ]; then
+        # [[ ! -z "$getting_key_name_from_service" ]] && echo "Not NULL" || echo "NULL"
+        if [ "$(systemctl is-active celestia-lightd.service)" = "active" ]; then
+            echo "the celestia-lightd status of your server is: "
+            systemctl status celestia-lightd | grep "Active"
+            echo ""
+            echo ""
+            echo "your current rpc_endpoints is:"
+            echo ""
+            cat "$WORKING_DIR"/selected_endpoint.txt
+            echo ""
+            while true; do
+                read -r -p "Do you want to change the rpc_endpoints IP? [Y/N] " new_rpc_endpoints
+                    case "$new_rpc_endpoints" in
+                        Y|y)
+                            sudo systemctl stop celestia-lightd.service
+                            rm "$KEY_DIR"/config.toml
+                            get_endpoints
+                            customaccname=$(<"$BACKUP_DIR"/accounts/current_account_name.txt)
+                            echo "$customaccname" >/dev/null 2>&1
+                            celestiad
+                            sudo systemctl daemon-reload
+                            sudo systemctl restart celestia-lightd
+                            echo "Done! , check your logs with: journalctl -u celestia-lightd -f"
+                            countdown 5 
+                            ;;
+                        N|n)
+                            systemctl restart celestia-lightd
+                            echo "keeping the Same rpc_endpoints..Lets restart your celestia-lightd service"
+                            echo "Done! , check your logs with: journalctl -u celestia-lightd -f"
+                            countdown 5
+                            ;;
+                          *) echo "please provide a valid response"
+                        continue ;;
+                    esac
+                break
+            done
+        else
+            echo "your node is not running or have some issues"
+            echo ""
+            echo "Lets printout the status of your celestia-lightd service:"
+            systemctl status celestia-lightd | grep "Active"
+            echo ""
+            INFO=$(find "$KEY_DIR"/keyring-test/ -name *.info|head -n1)
+            ADDRESS=$(find "$KEY_DIR"/keyring-test/ -name *.address|head -n1)
+            if [  -z "$INFO" ] && [  -z "$ADDRESS" ]; then
+                echo "No keys were found."
+                echo ""
+                echo "lets create one, just wait.."
+                systemctl stop celestia-lightd
+                countdown 5
+                celesh_create_key
+            else
+                read -r -p "Do you want to restart your celestia-lightd service?  y/n?" celesh_restart_service
+                if [ "$celesh_restart_service" = "y" ]; then
+                    systemctl stop celestia-lightd
+                    countdown 3 
+                    systemctl daemon-reload
+                    countdown 3
+                    systemctl start celestia-lightd
+                    clear
+                    print_welcome
+                    celesh_new_rpc_endpoints
+                fi    
+            fi
+        fi
+    fi    
+}
+
+#####################################################################################################
+celesh_init()
+{
+    systemctl stop celestia-lightd >/dev/null 2>&1
+    #celestia light init "${keyring_acc_name}" "${customaccname}" --p2p.network $currentnetwork
+    systemctl daemon-reload >/dev/null 2>&1
+    systemctl restart celestia-lightd >/dev/null 2>&1
+}
+################################<systemctl services functions>#######################################
+celesh_systemctl_init()
+{
+    sudo systemctl start celestia-lightd.service
+    sudo systemctl restart celestia-lightd.service
+    sudo systemctl stop celestia-lightd.service 
+    #sudo systemctl restart celestia-lightd.service    
+}
+#####################################################################################################
+gogo_installer() 
+{
+source "$WORKING_DIR"/celesh_go.sh #>/dev/null 2>&1
+}
+gogo_remover()
+{
+    clear
+    print_welcome
+    echo "First lets backup keys folder.."
+    countdown 3
+    celesh_backup_keys
+    echo "stoping celestia-lightd service.."
+    systemctl stop celestia-lightd >/dev/null 2>&1
+    countdown 3
+    echo "disabling celestia service.."
+    systemctl disable celestia-ligthd >/dev/null 2>&1
+    countdown 3
+    echo "deleting celestia-lightd.service from /etc/systemd/system/ folder " 
+    rm /etc/systemd/system/celestia-lightd.service >/dev/null 2>&1
+    countdown 3
+    rm -rvf "$HOME"/.celestia-app "$WORKING_DIR"/celestia-node  #"$HOME"/.celesh
+    echo "Deleting celestia Logs from journalctl"
+    journalctl --rotate
+    journalctl --vacuum-time=1s
+    echo "Done!"
+}
+
+
+#####################################################################################################################################################################################
+dialog --backtitle "[ CELESH  0.1 blockspacerace ]" \
+--title "About - [ **Legal Disclaimer** ]" \
+--msgbox 'These scripts are shared publicly to help others and to contribute back to the wider Celestia community.
+You may use, and copy these scripts and distribute them with your own projects.
+ For any non-personal sharing or distribution, you are required to provide a reference to this repository.
+
+All scripts are expressly provided:
+"AS IS." WE MAKE NO WARRANTY OF ANY KIND, EXPRESS, IMPLIED, IN FACT OR ARISING BY OPERATION OF LAW, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTY OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT AND DATA ACCURACY. WE NEITHER REPRESENTS NOR WARRANT THAT THE OPERATION OF THE CODE WILL BE UNINTERRUPTED OR ERROR-FREE, 
+OR THAT ANY DEFECTS WILL BE CORRECTED. WE DO NOT WARRANT OR MAKE ANY REPRESENTATIONS REGARDING THE USE OF THE SOFTWARE OR THE RESULTS THEREOF,
+INCLUDING BUT NOT LIMITED TO THE CORRECTNESS, ACCURACY, RELIABILITY, OR USEFULNESS OF THE CODE.
+
+You are solely responsible for determining the appropriateness of using the scripts and you assume all risks associated with its use,
+including but not limited to the risks and costs of errors, compliance with applicable laws, damage to or loss of data, programs or equipment,
+and the unavailability or interruption of operation. This scripts are not intended to be used in any situation where a failure could cause risk of injury or damage to property.' 0 0
+######################################################################################################################################################################################
+cmd=(dialog --separate-output --checklist "[ CELESH  0.1 BETA blockspacerace - by Aki ]:" 0 0 0) \
+options=(1 "Upgrade your Machine" off    # any option can be set to default to "on"
+         2 "Install celestia Dependencies etc." off
+         3 "Install Golang (will ask to remove the current version and install go $golangversion ) " off
+         4 "Install Celestia Node" off          
+         5 "create a celestia key" off
+         6 "Show me my NODE-ID" off
+         7 "Submit a PFB transaction" off
+         8  "BACKUP YOUR KEYS to $BACKUP_DIR" off
+         9 "Start your Node / change rpc_endpoints " off
+        10 "Check celestia-lightd logs" off
+        11 "REMOVE all CELESYSTEMD FOLDER and GO (key folder is not included) " off
+        12 "REMOVE golang (will remove the current version)" off)
+###################################################################################################################################################################################
+choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+clear
+for choice in $choices
+do
+    case $choice in
+        1) #"Upgrade your Machine
+            clear
+            print_welcome
+            celesh_upgrade 
+            clear
+            ;;
+        2)  #Install celestia Dependencies etc.
+            clear
+            print_welcome
+            celesh_deps  
+            clear
+            #print_welcome
+            ;;
+        3) #Install Golang (will ask to remove the current version and install go 1.19.1)
+            clear
+            print_welcome
+            celesh_golang 
+            #clear
+            #print_welcome
+            ;;
+        4) #Install Celestia Node
+            clear
+            print_welcome
+            celesh_install_node  
+            ;;
+        5) #create a celestia key
+            clear
+            print_welcome
+            celesh_create_key
+            countdown 5
+            ;;
+        6) #Show me my NODE-ID
+            celesh_showme_nodeid
+            ;;
+        7)  #Submit a PFB transaction
+            clear
+            print_welcome
+            echo ""
+            SHOW_NODE_ID=$(celesh_nodeid)
+            if [ -z "$SHOW_NODE_ID" ]; then
+            echo "seems your node is not up or is not running/installed"
+            countdown 5
+            else
+            celesh_pfb_transaction
+            fi
+            ;;
+
+        8)  #BACKUP YOUR KEYS to $HOME/.celesh_backups
+            celesh_backup_keys
+            ;;
+        9)  #Start your Node
+            celesh_new_rpc_endpoints
+            ;;
+       10)  #Check celestia-lightd logs
+            journalctl -u celestia-lightd.service -f
+            ;;
+       11)  #REMOVE all CELESYSTEMD FOLDER and GO (key folder is not included)
+            gogo_remover
+            ;; 
+       12)  #REMOVE golang (will remove the current version)
+            clear
+            print_welcome
+            echo "Checking Golang.."
+            download_go_installer
+            echo "Removing Golang (go)"
+            rm -rvf "$HOME"/go
+            rm "$HOME"/go1*
+            gogo_installer "remove"
+            echo "Done!"
+            countdown 3
+            source ~/.bashrc >/dev/null 2>&1
+            source "$HOME"/.bash_profile >/dev/null 2>&1
+            ;;
+
+esac
+done
