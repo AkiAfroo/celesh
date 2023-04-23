@@ -1,7 +1,7 @@
 # celesh: this Code is part of the celestia Bonus Task.- please dont use it in mainnet.
 
 What the script do:
-(https://i.postimg.cc/8zBFdZ8y/celesh-menu.png)
+https://i.postimg.cc/8zBFdZ8y/celesh-menu.png
 
 Usage:
 * First download it ```wget https://raw.githubusercontent.com/AkiAfroo/celesh/main/celesh```
