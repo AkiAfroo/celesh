@@ -47,7 +47,7 @@ echo -e "$($TEXT_COLOR $CYAN)
 \t╚██████╗███████╗███████╗███████╗███████║██║  ██║
 \t ╚═════╝╚══════╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝
 \t ${RESET}"
-echo -e      "\t$($TEXT_COLOR $BLUE)celesh${RESET} a Celestia Community Scripts!\n"
+echo -e "\t$($TEXT_COLOR $BLUE)celesh${RESET}      a Celestia Light Node installer!\n"
 echo "Your Celestia Version: "$get_celestia_installed_version""
 }
 clear
