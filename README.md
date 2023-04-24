@@ -1,4 +1,5 @@
 # celesh: this Code is part of the celestia Bonus Task and do not try to submit as yours.- please don't use it in mainnet.
+# you can use this script to install and do some task in your node (check the screenshots)
 * recommended to use this bash script in a fresh linux server (ubuntu/Debian) for **Light Node Only**
 * celesh will create a celeshfolder in your HOME directory where will save and copy some important files from your node as backup
 
