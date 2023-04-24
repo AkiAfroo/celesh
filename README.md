@@ -1,5 +1,5 @@
 # celesh: this Code is part of the celestia Bonus Task.- please don't use it in mainnet.
-* recommended to use this bash script in a fresh linux server (ubuntu)
+* recommended to use this bash script in a fresh linux server (ubuntu) for **Light Node Only**
 * celesh will create a celeshfolder in your HOME directory where will save and copy some important files from your node as backup
 
 ![celesh-menu.png](https://i.postimg.cc/DysKWKfV/celesh-menu.png)
