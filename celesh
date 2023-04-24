@@ -560,7 +560,7 @@ options=(1 "Upgrade your Machine" off    # any option can be set to default to "
          8  "BACKUP YOUR KEYS to $BACKUP_DIR" off
          9 "Start your Node / change rpc_endpoints " off
         10 "Check celestia-lightd logs" off
-        11 "REMOVE/UNINSTALL GOlang " off
+        11 "REMOVE celestia-app - celestia Node Folder" off
         12 "REMOVE golang (will remove the current version)" off)
 ###################################################################################################################################################################################
 choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
