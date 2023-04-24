@@ -553,7 +553,7 @@ cmd=(dialog --separate-output --checklist "[ CELESH  0.1 BETA blockspacerace - b
 options=(1 "Upgrade your Machine" off    # any option can be set to default to "on"
          2 "Install celestia Dependencies etc." off
          3 "Install Golang (will ask to remove the current version and install go $golangversion ) " off
-         4 "Install Celestia Node" off          
+         4 "Install / Upgrade Celestia Node" off          
          5 "create a celestia key" off
          6 "Show me my NODE-ID" off
          7 "Submit a PFB transaction" off
