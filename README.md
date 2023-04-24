@@ -1,4 +1,4 @@
-# celesh: this Code is part of the celestia Bonus Task.- please dont use it in mainnet.
+# celesh: this Code is part of the celestia Bonus Task.- please don't use it in mainnet.
 * recommended to use this bash script in a fresh linux server (ubuntu)
 * celesh will create a celeshfolder in your HOME directory where will save and copy some important files from your node as backup
 
@@ -9,11 +9,17 @@
 - install celestia deps
 - install/upgrade/remove golang (modified version of go installer by  kerolloz)
 - clone and compile celestia light node repo
+- backup your keys folder to celeshfolder in zip format
 - backup celestia and cel-key binaries
 - create new accounts keys and backup mnenomics into a file inside celeshfolder
 - send PFB Transactions
 - change RPC-ENPOINTS 
 - Much More...
+
+what celesh can't do:
+- transfer keys to an external server (maybe in the future)
+- increase or monitoring your server uptime (its up to you to monitoring your server)
+- 
 
 Usage:
 * First download it ```wget https://raw.githubusercontent.com/AkiAfroo/celesh/main/celesh```
