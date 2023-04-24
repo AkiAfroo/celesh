@@ -2,7 +2,7 @@
 * recommended to use this bash script in a fresh linux server (ubuntu)
 * celesh will create a celeshfolder in your HOME directory where will save and copy some important files from your node as backup
 
-![celesh-menu.png](https://i.postimg.cc/8zBFdZ8y/celesh-menu.png)
+![celesh-menu.png](https://i.postimg.cc/DysKWKfV/celesh-menu.png)
 
 * celesh can:
 - upgrade your machine
