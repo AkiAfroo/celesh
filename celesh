@@ -60,7 +60,7 @@ echo "Please wait.."
 # RPC Endpoins https://docs.celestia.org/nodes/blockspace-race/#rpc-endpoints The default port is 26657
 #######################################################################################################  ---default list --
 CELESH_VERSION="0.1"
-celegitversion="v0.9.2"
+celegitversion="v0.9.3"
 golangversion="1.20.3"
 fecha=$(date +%Y-%m-%d-%H%M%S)
 export CELESH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -222,6 +222,7 @@ celesh_install_node()
     echo "Your celestia version is: "
     echo "node installed"
     echo "$celestia_version"
+    echo "run the script Again and start your node with option 9"
     countdown 5
 }
 #####################################################################################################
@@ -434,7 +435,7 @@ celesh_new_rpc_endpoints()
                     case "$new_rpc_endpoints" in
                         Y|y)
                             sudo systemctl stop celestia-lightd.service
-                            rm "$KEY_DIR"/config.toml
+                            rm "$HOME"/.celestia-light-blockspacerace-0/config.toml
                             get_endpoints
                             customaccname=$(<"$BACKUP_DIR"/accounts/current_account_name.txt)
                             echo "$customaccname" >/dev/null 2>&1
@@ -445,6 +446,8 @@ celesh_new_rpc_endpoints()
                             countdown 5 
                             ;;
                         N|n)
+                            rm "$HOME"/.celestia-light-blockspacerace-0/config.toml
+                            systemctl daemon-reload
                             systemctl restart celestia-lightd
                             echo "keeping the Same rpc_endpoints..Lets restart your celestia-lightd service"
                             echo "Done! , check your logs with: journalctl -u celestia-lightd -f"
