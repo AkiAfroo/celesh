@@ -536,7 +536,7 @@ celesh_rmfolder()
 
 
 #####################################################################################################################################################################################
-dialog --backtitle "[ CELESH  0.1 blockspacerace ]" \
+dialog --backtitle "[ CELESH  0.1 - celestia node v0.10.4 blockspacerace  ]" \
 --title "About - [ **Legal Disclaimer** ]" \
 --msgbox 'These scripts are shared publicly to help others and to contribute back to the wider Celestia community.
 You may use, and copy these scripts and distribute them with your own projects.
