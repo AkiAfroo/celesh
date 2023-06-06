@@ -60,7 +60,7 @@ echo "Please wait.."
 # RPC Endpoins https://docs.celestia.org/nodes/blockspace-race/#rpc-endpoints The default port is 26657
 #######################################################################################################  ---default list --
 CELESH_VERSION="0.1"
-celegitversion="v0.10.2"
+celegitversion="v0.10.4"
 golangversion="1.20.3"
 fecha=$(date +%Y-%m-%d-%H%M%S)
 export CELESH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
