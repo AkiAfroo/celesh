@@ -1,4 +1,4 @@
-# celesh: update: , the blockspacerace testnet is over, and poins are allocated (53 points gained for this tools! thx Celestia Network!!)
+# celesh: update: , the blockspacerace testnet is over. (53 points gained for this tools! thx Celestia Network!!)
 # - please don't use it in mainnet.
 # you can use this script to install and do some task in your node (check the screenshots)
 * recommended to use this bash script in a fresh linux server (ubuntu/Debian) for **Light Node Only**
