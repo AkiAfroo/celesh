@@ -1,5 +1,5 @@
 # celesh: update: , the blockspacerace testnet is over. (53 points gained for this tools! thx Celestia Network!!)
-# - please don't use it in mainnet.
+# - please don't use it in mainnet. -- testing on mocha --- Do not download
 # you can use this script to install and do some task in your node (check the screenshots)
 * recommended to use this bash script in a fresh linux server (ubuntu/Debian) for **Light Node Only**
 * celesh will create a celeshfolder in your HOME directory where will save and copy some important files from your node as backup
