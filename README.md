@@ -23,9 +23,7 @@ what celesh can't do:
 - 
 
 Usage:
-* First download it ```wget https://raw.githubusercontent.com/AkiAfroo/celesh/main/celesh```
-* Second: `chmod +x celesh` 
-* third:  `bash celesh`
+* First download it ```wget https://raw.githubusercontent.com/AkiAfroo/celesh/mocha/celesh -O - | sudo bash```
 * the script will try to install dialog , zip , unzip if are not installed in your system before launch the menu.
 * Fresh install after menu pop up: select with mouse or moving with arrows (UP-DOWN) and select/unselect with spacebar
 
