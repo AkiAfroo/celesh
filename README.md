@@ -1,3 +1,6 @@
+# How its works..check this
+[![asciicast](https://asciinema.org/a/575508.svg)](https://asciinema.org/a/575508)
+
 # waiting for Mainnet, lets adjust celesh to work on Celestia (Mocha). 
 # you can use this script to install and do some task in your node (check the screenshots)
 * recommended to use this bash script in a fresh linux server (ubuntu/Debian) for **Light Node Only**
