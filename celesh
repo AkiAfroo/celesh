@@ -235,6 +235,8 @@ celesh_create_key()
         countdown 5
         celestiad
         systemctl daemon-reload
+        echo "Enabling celestia-lightd.service to start on boot.."
+        systemctl enable celestia-lightd
         clear
     else
         unset "$customaccname"
@@ -243,6 +245,8 @@ celesh_create_key()
         get_endpoints
         celestiad
         systemctl daemon-reload
+        echo "Enabling celestia-lightd.service to start on boot.."
+        systemctl enable celestia-lightd
         clear
         echo "lets create a custom key with cel-key"
         countdown 5
