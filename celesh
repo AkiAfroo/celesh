@@ -164,6 +164,25 @@ celesh_golang()
     download_go_installer #> /dev/null
     chmod +x "$WORKING_DIR"/celesh_go.sh
     gogo_installer "--version" "$golangversion"
+    #### updating .profile
+    profile_file="$HOME/.profile"
+    new_path='export PATH=$PATH:/usr/local/go/bin'
+
+    if [ -f "$profile_file" ]; then
+        # El archivo ~/.profile existe, así que comprobamos si ya contiene la línea
+        if ! grep -q "$new_path" "$profile_file"; then
+            # La línea no existe, así que la agregamos al final del archivo
+            echo "$new_path" >> "$profile_file"
+            echo "Línea añadida al archivo $profile_file"
+            source ~/.profile
+        else
+            echo "La línea ya existe en el archivo $profile_file"
+        fi
+    else
+        # El archivo no existe, así que lo creamos y agregamos la línea
+        echo "$new_path" >> "$profile_file"
+        echo "Archivo $profile_file creado y línea añadida"
+    fi
     source ~/.bashrc >/dev/null 2>&1
     source "$HOME"/.bash_profile >/dev/null 2>&1
 }
