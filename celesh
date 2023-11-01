@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 ####### CELESH is a script to install all what to need to run (CELESTIA LIGHTNODE) in your server >>>> created By Aki
-## git clone --single-branch --branch mocha https://github.com/AkiAfroo/celesh.git
-## ./cel-key list --node.type light --keyring-backend test --p2p.network mocha
+## git clone --single-branch --branch celestia https://github.com/AkiAfroo/celesh.git
+## ./cel-key list --node.type light --keyring-backend test --p2p.network celestia
 ## curl -X GET http://localhost:26659/balance 
 
 #################################<the script should be run as root user>################################################################
@@ -66,8 +66,8 @@ echo "Please wait.."
 #-------------------------------------------------------------------------------------------- ---default list --
 #SOME VARIABLES
 
-CELESH_VERSION="0.2"
-celegitversion="v0.11.0"
+CELESH_VERSION="1"
+celegitversion="v0.12.0"
 golangversion="1.21.1"
 fecha=$(date +%Y-%m-%d-%H%M%S)
 export CELESH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -80,37 +80,26 @@ BACKUP_DIR="${CELESH}/celeshfiles/backups"
 WORKING_DIR="${CELESH}/celeshfiles/working_dir"
 #---------------------------------------------------------------------------------------------
 
-NODE="light"
-currentnetwork="mocha"
-NETWORKVERSION="4"
-KEY_DIR="$HOME/.celestia-${NODE}-${currentnetwork}-${NETWORKVERSION}/keys"
+NODE="light-node"
+currentnetwork="celestia"
+KEY_DIR="$HOME/.celestia-${NODE}/${currentnetwork}/keys"
 keyring_acc_name="--keyring.accname"
 get_celestia_installed_version=$(celestia version | grep -E 'Semantic|Commit' | tr '\n' ' ')
 
 #--------------------------------------------------------------------------------------------
-#source https://docs.celestia.org/nodes/mocha-testnet/#rpc-endpoints
+#source https://docs.celestia.org/nodes/celestia-testnet/#rpc-endpoints
 
 rpc_endpoints=$(tee <<EOF >/dev/null "$WORKING_DIR"/rpc_endpoints.txt
-full.consensus.mocha-4.celestia-mocha.com
-consensus-full-mocha-4.celestia-mocha.com
-rpc-mocha.pops.one
-celestia-rpc.f5nodes.com
-celestia-testnet.brightlystake.com
-rpc-celestia-mocha.architectnodes.com
+rpc.celestia.pops.one
 EOF
 )
 
 #--------------------------------------------------------------------------------------------
-# gRPC Endpoins https://docs.celestia.org/nodes/mocha-testnet/#grpc-endpoints The default port is 9090 -- not implemented -- 
+# gRPC Endpoins https://docs.celestia.org/nodes/celestia-testnet/#grpc-endpoints The default port is 9090 -- not implemented -- 
 grpc_endpoints=$(tee <<EOF >/dev/null "$WORKING_DIR"/grpc_endpoints.txt
-https://grpc-mocha.pops.one
-grpc.celestia-mocha.com:443
-grpc-2.celestia-mocha.com:443
-full.consensus.mocha-4.celestia-mocha.com:9090
-consensus-full-mocha-4.celestia-mocha.com:9090
-celestia-grpc.f5nodes.com
-celestia-testnet.brightlystake.com:9390
-grpc-celestia-mocha.architectnodes.com:1443
+
+empty..
+
 EOF
 )
 #echo "$rpc_endpoints"
@@ -195,7 +184,7 @@ celesh_install_node()
     rm -rvf celestia-node 
     git clone https://github.com/celestiaorg/celestia-node.git 
     cd celestia-node/ || exit 
-    git checkout tags/$celegitversion 
+    #git checkout tags/$celegitversion 
     countdown 5
     clear
     print_welcome
@@ -396,7 +385,7 @@ After=network-online.target
 [Service]
 User=$USER
 ExecStartPre=$(which celestia) light init ${keyring_acc_name} ${customaccname} --p2p.network ${currentnetwork}
-ExecStart=$(which celestia) light start --core.ip ${IP_RPC} ${keyring_acc_name} ${customaccname} --p2p.network mocha
+ExecStart=$(which celestia) light start --core.ip ${IP_RPC} ${keyring_acc_name} ${customaccname} --p2p.network ${currentnetwork}
 Restart=on-failure
 RestartSec=3
 LimitNOFILE=4096
@@ -444,7 +433,7 @@ celesh_new_rpc_endpoints()
                     case "$new_rpc_endpoints" in
                         Y|y)
                              systemctl stop celestia-lightd.service
-                            rm "$HOME"/.celestia-light-mocha-${NETWORKVERSION}/config.toml
+                            rm "$HOME"/.celestia-${NODE}/${currentnetwork}/config.toml
                             get_endpoints
                             customaccname=$(<"$BACKUP_DIR"/accounts/current_account_name.txt)
                             echo "$customaccname" >/dev/null 2>&1
@@ -455,7 +444,7 @@ celesh_new_rpc_endpoints()
                             countdown 5 
                             ;;
                         N|n)
-                            rm "$HOME"/.celestia-light-${currentnetwork}-${NETWORKVERSION}/config.toml
+                            rm "$HOME"/.celestia-${NODE}/${currentnetwork}/config.toml
                             systemctl daemon-reload
                             systemctl restart celestia-lightd
                             echo "keeping the Same rpc_endpoints..Lets restart your celestia-lightd service"
@@ -503,7 +492,6 @@ celesh_new_rpc_endpoints()
 celesh_init()
 {
     systemctl stop celestia-lightd >/dev/null 2>&1
-    #celestia light init "${keyring_acc_name}" "${customaccname}" --p2p.network ${currentnetwork}
     systemctl daemon-reload >/dev/null 2>&1
     systemctl restart celestia-lightd >/dev/null 2>&1
 }
@@ -545,7 +533,7 @@ celesh_rmfolder()
 
 
 #--------------------------------------------------------------------------------------------
-dialog --backtitle "[ CELESH  0.1 - celestia node v0.10.4 mocha  ]" \
+dialog --backtitle "[ CELESH  0.1 - celestia node v0.10.4 celestia  ]" \
 --title "About - [ **Legal Disclaimer** ]" \
 --msgbox 'These scripts are shared publicly to help others and to contribute back to the wider Celestia community.
 You may use, and copy these scripts and distribute them with your own projects.
@@ -561,7 +549,7 @@ You are solely responsible for determining the appropriateness of using the scri
 including but not limited to the risks and costs of errors, compliance with applicable laws, damage to or loss of data, programs or equipment,
 and the unavailability or interruption of operation. This scripts are not intended to be used in any situation where a failure could cause risk of injury or damage to property.' 0 0
 #--------------------------------------------------------------------------------------------
-cmd=(dialog --separate-output --checklist "[ CELESH  0.1 BETA mocha - by Aki ]:" 0 0 0) \
+cmd=(dialog --separate-output --checklist "[ CELESH  0.1 BETA celestia - by Aki ]:" 0 0 0) \
 options=(1 "Upgrade your Machine" off    # any option can be set to default to "on"
          2 "Install celestia Dependencies etc." off
          3 "Install Golang (will ask to remove the current version and install go $golangversion ) " off
@@ -623,7 +611,8 @@ do
             echo "seems your node is not up or is not running/installed"
             countdown 5
             else
-            celesh_pfb_transaction
+            #celesh_pfb_transaction #lets comment this, because i dont think is need in mainnet. that was a function for bsr network. 
+            echo "everything is ok."
             fi
             ;;
 
