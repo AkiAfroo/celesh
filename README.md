@@ -6,7 +6,7 @@
 * recommended to use this bash script in a fresh linux server (ubuntu/Debian) | raspberry pi arm devices for **Light Node Only**
 * celesh will create a celeshfolder in your HOME directory where will save and copy some important files from your node as backup
 
-![celesh-menu.png](https://i.postimg.cc/njbfVJbk/celesh-menu.png)
+[![celesh-menu.png](https://i.postimg.cc/vBDYzY0p/celesh-menu.png)
 
 * celesh can:
 - upgrade your machine
