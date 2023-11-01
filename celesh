@@ -52,7 +52,7 @@ echo -e "$($TEXT_COLOR $CYAN)
 \t ╚═════╝╚══════╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝
 \t ${RESET}"
 echo -e      "\t$($TEXT_COLOR $BLUE)    celesh${RESET} a Celestia Light Node installer!\n"
-echo "Your Celestia Version: "$get_celestia_installed_version""
+echo "Your Celestia Version: ""$get_celestia_installed_version"""
 }
 clear
 print_welcome
@@ -234,7 +234,7 @@ celesh_create_key()
         read -r -p "Please enter the Name of your Celestia custom Key. " customaccname
         echo ""
         #printf "%s" "$customaccname" > "$BACKUP_DIR"/accounts/current_account_name.txt
-        printf "%s" "your custom Key name: " $customaccname
+        printf "%s" "your custom Key name: " "$customaccname"
         printf "%s\t%s\n" "$customaccname" > "$BACKUP_DIR"/accounts/current_account_name.txt
         get_endpoints
         echo "Downloading ENDPOINTS..."
@@ -259,7 +259,7 @@ celesh_create_key()
         echo "lets create a custom key with cel-key"
         countdown 5
     fi
-    cel-key add "$customaccname" --keyring-backend test --node.type light --p2p.network ${currentnetwork} 2>&1 | tee ""$BACKUP_DIR"/accounts/mnemonics/"$customaccname"-mnemonic-output-"$fecha".txt"
+    cel-key add "$customaccname" --keyring-backend test --node.type light --p2p.network ${currentnetwork} 2>&1 | tee """$BACKUP_DIR""/accounts/mnemonics/""$customaccname""-mnemonic-output-""$fecha"".txt"
     echo ""
     echo ""
     cd "$HOME" || exit
@@ -269,6 +269,7 @@ celesh_create_key()
         echo "IMPORTANT: A copy of the output of cel-key that store yours mnemonic-seeds words is saved in ""$BACKUP_DIR"""
         echo ""
         echo "NOTE: we recommend making a copy of your mnemonics now in case something goes wrong!"
+        echo "Done! , check your logs with: journalctl -u celestia-lightd -f"
         celesh_init 
     else
         echo "something goes wrong! , cant create your Keys.."
@@ -314,9 +315,9 @@ celesh_showme_nodeid()
                 echo "seems your node is not up or is not installed"
                 countdown 5
             else
-                cd "$KEY_DIR"/keyring-test
+                cd "$KEY_DIR"/keyring-test || exit
                 celestia_acc_name=$(basename *.info .info)
-                echo $celestia_acc_name >/dev/null 2>&1
+                echo "$celestia_acc_name" >/dev/null 2>&1
                 echo "Your Node-ID is:"
                 echo "$SHOW_NODE_ID" | tee "${CELESH}"/celeshfiles/backups/accounts/"$celestia_acc_name"_nodeid_backup_"$fecha".txt
                 echo ""
@@ -418,7 +419,6 @@ celesh_new_rpc_endpoints()
          
     fi
     if [ ! -z "$getting_key_name_from_service" ]; then
-        # [[ ! -z "$getting_key_name_from_service" ]] && echo "Not NULL" || echo "NULL"
         if [ "$(systemctl is-active celestia-lightd.service)" = "active" ]; then
             echo "the celestia-lightd status of your server is: "
             systemctl status celestia-lightd | grep "Active"
@@ -494,14 +494,6 @@ celesh_init()
     systemctl stop celestia-lightd >/dev/null 2>&1
     systemctl daemon-reload >/dev/null 2>&1
     systemctl restart celestia-lightd >/dev/null 2>&1
-}
-################################<systemctl services functions>#######################################
-celesh_systemctl_init()
-{
-     systemctl start celestia-lightd.service
-     systemctl restart celestia-lightd.service
-     systemctl stop celestia-lightd.service 
-    # systemctl restart celestia-lightd.service    
 }
 #--------------------------------------------------------------------------------------------
 gogo_installer() 
@@ -579,14 +571,11 @@ do
             print_welcome
             celesh_deps  
             clear
-            #print_welcome
             ;;
         3) #Install Golang (will ask to remove the current version and install go 1.19.1)
             clear
             print_welcome
             celesh_golang 
-            #clear
-            #print_welcome
             ;;
         4) #Install Celestia Node
             clear
