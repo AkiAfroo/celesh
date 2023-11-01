@@ -29,6 +29,8 @@ Usage:
 * First download it ```wget https://raw.githubusercontent.com/AkiAfroo/celesh/mainnet/celesh```
 * Second: `chmod +x celesh` 
 * third:  `bash celesh`
+* if the script as for sudo , do this
+* `sudo bash celesh` 
 * the script will try to install dialog , zip , unzip if are not installed in your system before launch the menu.
 * Fresh install after menu pop up: select with mouse or moving with arrows (UP-DOWN) and select/unselect with spacebar
 
