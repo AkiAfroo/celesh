@@ -1,9 +1,9 @@
-# How its works..check this
+# a Celestia Light Node,  How its works..check this
 [![asciicast](https://asciinema.org/a/575508.svg)](https://asciinema.org/a/575508)
 
-# waiting for Mainnet, lets adjust celesh to work on Celestia (Mocha). 
+# Ready For Mainnet.  
 # you can use this script to install and do some task in your node (check the screenshots)
-* recommended to use this bash script in a fresh linux server (ubuntu/Debian) for **Light Node Only**
+* recommended to use this bash script in a fresh linux server (ubuntu/Debian) | raspberry pi arm devices for **Light Node Only**
 * celesh will create a celeshfolder in your HOME directory where will save and copy some important files from your node as backup
 
 ![celesh-menu.png](https://i.postimg.cc/DysKWKfV/celesh-menu.png)
