@@ -37,7 +37,7 @@ Usage:
 ![install-options.png](https://i.postimg.cc/MT4W3C4X/install-options.png)
 * options : ```2,3,4,5```
 
-![install-options.png](https://i.postimg.cc/MT4W3C4X/install-options.png)
+![celesh-more-options.png](https://i.postimg.cc/PJwdg6sy/celesh-more-options.png)
 
 * Have fun !
 
