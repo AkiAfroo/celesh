@@ -6,7 +6,7 @@
 * recommended to use this bash script in a fresh linux server (ubuntu/Debian) | raspberry pi arm devices for **Light Node Only**
 * celesh will create a celeshfolder in your HOME directory where will save and copy some important files from your node as backup
 
-[![celesh-menu.png](https://i.postimg.cc/vBDYzY0p/celesh-menu.png)
+![celesh-menu.png](https://i.postimg.cc/vBDYzY0p/celesh-menu.png)
 
 * celesh can:
 - upgrade your machine
@@ -34,10 +34,10 @@ Usage:
 * the script will try to install dialog , zip , unzip if are not installed in your system before launch the menu.
 * Fresh install after menu pop up: select with mouse or moving with arrows (UP-DOWN) and select/unselect with spacebar
 
-![install-options.png](https://i.postimg.cc/hzLWf5Kq/install-options.png)
+![install-options.png](https://i.postimg.cc/MT4W3C4X/install-options.png)
 * options : ```2,3,4,5```
 
-![celesh-more-options.png](https://i.postimg.cc/CnwyDsKn/celesh-more-options.png)
+![install-options.png](https://i.postimg.cc/MT4W3C4X/install-options.png)
 
 * Have fun !
 
