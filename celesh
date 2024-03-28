@@ -67,7 +67,7 @@ echo "Please wait.."
 #SOME VARIABLES
 
 CELESH_VERSION="1.0"
-celegitversion="v0.12.1"
+celegitversion="v0.13.2"
 golangversion="1.21.1"
 fecha=$(date +%Y-%m-%d-%H%M%S)
 export CELESH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
